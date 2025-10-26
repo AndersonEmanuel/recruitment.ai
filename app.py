@@ -1,52 +1,68 @@
 import streamlit as st
 
-st.set_page_config(page_title="Recruitment AI", page_icon="🤖", layout="wide")
+st.set_page_config(
+    page_title="Recruitment AI",
+    page_icon="🤖",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
 
-st.title("Recruitment AI Dashboard")
-st.write(
+st.title("Recruitment AI")
+st.caption("Uma suíte integrada para avaliação inteligente de talentos.")
+
+st.markdown(
     """
-    Welcome to the Recruitment AI Streamlit app. Use the controls in the sidebar to explore
-    candidate profiles, evaluate interview notes, and review automated recommendations.
+    ## 👋 Bem-vindo
+    Explore as páginas na barra lateral para acessar os fluxos principais da plataforma:
+
+    - **Análise de Currículos** com orquestração via [CrewAI](https://www.crewai.com/).
+    - **Estúdio de Áudio** para monitorar e reproduzir fontes de entrada e saída.
+
+    Cada página oferece instruções detalhadas para que você possa começar rapidamente.
     """
 )
 
-with st.sidebar:
-    st.header("Search Filters")
-    job_role = st.selectbox(
-        "Target role",
-        ["Software Engineer", "Data Scientist", "Product Manager", "Designer", "Other"],
+col1, col2 = st.columns(2)
+with col1:
+    st.subheader("Comece pela Análise de Currículos")
+    st.write(
+        """
+        Faça upload de vários currículos em PDF, DOCX ou TXT e gere resumos automáticos,
+        pontuações e insights sobre os candidatos. Ideal para triagens em lote.
+        """
     )
-    experience = st.slider("Minimum years of experience", min_value=0, max_value=20, value=2)
-    include_remote = st.checkbox("Include remote candidates", value=True)
+    st.page_link(
+        "pages/1_analise_de_curriculos.py",
+        label="Ir para Análise de Currículos",
+        icon="📄",
+    )
 
-st.subheader("Candidate Overview")
+with col2:
+    st.subheader("Gerencie os áudios do seu computador")
+    st.write(
+        """
+        Selecione fontes de áudio de entrada ou saída, faça upload de trechos gravados e
+        monitore tudo em um painel centralizado para entrevistas ou dinâmicas remotas.
+        """
+    )
+    st.page_link(
+        "pages/2_audio_studio.py",
+        label="Ir para Estúdio de Áudio",
+        icon="🎧",
+    )
+
+st.markdown("---")
+
+st.subheader("Como funciona")
+st.markdown(
+    """
+    1. **Configure seus agentes CrewAI** na página de análise para definir o fluxo de avaliação.
+    2. **Envie os currículos ou áudios** conforme a necessidade do processo seletivo.
+    3. **Acompanhe os resultados** em tempo real e exporte os insights para o seu ATS favorito.
+    """
+)
+
 st.info(
-    f"Filtering for **{job_role}** candidates with at least **{experience}** years of experience"
-)
-if include_remote:
-    st.success("Remote candidates will be included in the search results.")
-else:
-    st.warning("Remote candidates are excluded from the search results.")
-
-st.subheader("Interview Summaries")
-st.write(
-    """
-    Upload structured interview notes to get tailored summaries, improvement feedback, and
-    hiring recommendations powered by AI.
-    """
-)
-uploaded_file = st.file_uploader("Upload interview notes (PDF, DOCX, or TXT)", type=["pdf", "docx", "txt"])
-if uploaded_file is not None:
-    st.write("File uploaded successfully! In a production app, the contents would be analyzed here.")
-    st.button("Run AI Analysis")
-else:
-    st.caption("Waiting for a file upload to begin analysis.")
-
-st.subheader("Next Steps")
-st.write(
-    """
-    - Refine the AI evaluation prompts.
-    - Integrate with the applicant tracking system.
-    - Enable real-time collaboration for hiring teams.
-    """
+    "Dica: você pode personalizar prompts e agentes diretamente nas páginas especializadas "
+    "para adaptar os resultados ao seu processo seletivo."
 )
