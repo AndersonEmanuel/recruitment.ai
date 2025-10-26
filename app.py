@@ -31,11 +31,8 @@ with col1:
         pontuações e insights sobre os candidatos. Ideal para triagens em lote.
         """
     )
-    st.page_link(
-        "pages/1_analise_de_curriculos.py",
-        label="Ir para Análise de Currículos",
-        icon="📄",
-    )
+    if st.button("📄 Ir para Análise de Currículos", use_container_width=True):
+        st.switch_page("pages/1_analise_de_curriculos.py")
 
 with col2:
     st.subheader("Gerencie os áudios do seu computador")
@@ -45,11 +42,8 @@ with col2:
         monitore tudo em um painel centralizado para entrevistas ou dinâmicas remotas.
         """
     )
-    st.page_link(
-        "pages/2_audio_studio.py",
-        label="Ir para Estúdio de Áudio",
-        icon="🎧",
-    )
+    if st.button("🎧 Ir para Estúdio de Áudio", use_container_width=True):
+        st.switch_page("pages/2_audio_studio.py")
 
 st.markdown("---")
 
