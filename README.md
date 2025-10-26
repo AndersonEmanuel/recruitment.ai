@@ -4,15 +4,28 @@ This repository now contains a starter [Streamlit](https://streamlit.io/) projec
 
 ## Getting started
 
-1. Install the dependencies:
+1. Create a virtual environment (Python 3.9+ recommended):
    ```bash
+   python -m venv .venv
+   ```
+2. Activate the virtual environment:
+   ```bash
+   # Linux or macOS
+   source .venv/bin/activate
+
+   # Windows (PowerShell)
+   .venv\\Scripts\\Activate.ps1
+   ```
+3. Install the dependencies inside the virtual environment:
+   ```bash
+   pip install --upgrade pip
    pip install -r requirements.txt
    ```
-2. Run the Streamlit development server:
+4. Run the Streamlit development server:
    ```bash
    streamlit run app.py
    ```
-3. Open the URL displayed in the terminal (typically `http://localhost:8501`).
+5. Open the URL displayed in the terminal (typically `http://localhost:8501`).
 
 ## Project structure
 
