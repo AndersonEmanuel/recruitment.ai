@@ -5,6 +5,8 @@ from typing import Iterable, List
 
 import streamlit as st
 
+st.set_page_config(page_title="Análise de Currículos", page_icon="🧠", layout="wide")
+
 CREW_AVAILABLE = importlib.util.find_spec("crewai") is not None
 
 if CREW_AVAILABLE:
@@ -21,12 +23,20 @@ DEFAULT_PROCESS = "sequential"
 st.markdown(
     """
     <style>
+        body {
+            background: linear-gradient(120deg, rgba(91,141,239,0.08), rgba(37,99,235,0.04));
+        }
+        main .block-container {
+            padding: 2.4rem 3rem 3rem;
+            max-width: 1180px;
+        }
         .crew-hero {
             background: linear-gradient(135deg, #1f3b65, #5b8def);
             padding: 2.8rem;
             border-radius: 1.5rem;
             color: #ffffff;
             margin-bottom: 2rem;
+            box-shadow: 0 18px 45px rgba(31, 59, 101, 0.35);
         }
         .crew-hero h1 {
             font-size: 2.2rem;
@@ -35,6 +45,14 @@ st.markdown(
         .crew-hero p {
             font-size: 1.05rem;
             opacity: 0.85;
+        }
+        .crew-form {
+            background: #ffffff;
+            border-radius: 1.2rem;
+            padding: 1.6rem;
+            border: 1px solid #d6dcf5;
+            box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+            margin-bottom: 2rem;
         }
         .crew-step-card {
             background-color: #ffffff;
@@ -59,6 +77,30 @@ st.markdown(
         .crew-section-title {
             font-size: 1.4rem;
             margin-bottom: 0.6rem;
+        }
+        .crew-action-row {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+        .crew-action-row .stButton button {
+            width: 100%;
+            border-radius: 999px;
+            padding: 0.65rem 1.2rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, rgba(37,99,235,0.88), rgba(30,64,175,0.92));
+            border: none;
+            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.25);
+        }
+        .crew-action-row .stButton button:hover {
+            transform: translateY(-1px);
+        }
+        .crew-action-row .stButton:nth-child(2) button {
+            background: transparent;
+            border: 1px solid rgba(37,99,235,0.4);
+            color: #1d4ed8;
+            box-shadow: none;
         }
         .result-card {
             background-color: #ffffff;
@@ -146,6 +188,7 @@ with col3:
 st.markdown("<div class='crew-section-title'>Envie os currículos para análise</div>", unsafe_allow_html=True)
 st.caption("Aceitamos múltiplos arquivos de uma só vez. Limite máximo: 10 MB por arquivo.")
 
+st.markdown("<div class='crew-form'>", unsafe_allow_html=True)
 uploaded_files = st.file_uploader(
     "Arraste e solte ou clique para selecionar currículos",
     type=["pdf", "docx", "txt"],
@@ -153,12 +196,16 @@ uploaded_files = st.file_uploader(
     key="curriculos",
 )
 
+st.markdown("<div class='crew-action-row'>", unsafe_allow_html=True)
 col_run, col_reset = st.columns([2, 1])
 run_analysis = col_run.button("🚀 Analisar com CrewAI", use_container_width=True)
 if col_reset.button("Limpar envios", use_container_width=True):
     st.session_state.pop("curriculos", None)
     st.session_state.pop("analysis_results", None)
     st.rerun()
+st.markdown("</div>", unsafe_allow_html=True)
+
+st.markdown("</div>", unsafe_allow_html=True)
 
 if "analysis_results" not in st.session_state:
     st.session_state["analysis_results"] = []

@@ -7,6 +7,8 @@ from typing import Optional, Tuple
 import streamlit as st
 import streamlit.components.v1 as components
 
+st.set_page_config(page_title="Estúdio de Áudio", page_icon="🎧", layout="wide")
+
 
 def _browser_audio_recorder(element_id: str = "browser-recorder") -> Optional[Tuple[bytes, str]]:
     """Renderiza um componente HTML que grava áudio pelo navegador."""
@@ -155,15 +157,34 @@ def _browser_audio_recorder(element_id: str = "browser-recorder") -> Optional[Tu
 st.markdown(
     """
     <style>
+        body {
+            background: radial-gradient(circle at 15% 20%, rgba(246,51,102,0.08), transparent 50%),
+                        radial-gradient(circle at 80% 0%, rgba(63,81,181,0.08), transparent 52%),
+                        #f7f8fc;
+        }
+        main .block-container {
+            padding: 2.4rem 3rem 3rem;
+            max-width: 1180px;
+        }
         .audio-section {
-            padding: 1.25rem;
-            border: 1px solid var(--secondary-background-color,#d6d6d6);
-            border-radius: 0.75rem;
-            background: var(--background-color,#ffffff);
+            padding: 1.5rem;
+            border: 1px solid rgba(99,102,241,0.14);
+            border-radius: 1rem;
+            background: rgba(255, 255, 255, 0.92);
+            box-shadow: 0 18px 40px rgba(79, 70, 229, 0.12);
+            margin-bottom: 1.6rem;
         }
         .audio-section h4 {
             margin-top: 0;
             margin-bottom: 0.5rem;
+        }
+        .audio-config-card {
+            background: #ffffff;
+            border-radius: 1rem;
+            padding: 1.4rem 1.6rem;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08);
+            margin-bottom: 1.6rem;
         }
         .status-card {
             border-radius: 0.75rem;
@@ -172,9 +193,19 @@ st.markdown(
             border: 1px solid rgba(246,51,102,0.15);
             font-weight: 500;
         }
+        .status-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.2rem;
+        }
         .timestamp {
             color: var(--text-color,#6c757d);
             text-align: right;
+        }
+        .stToggle, .stCheckbox, .stRadio {
+            padding-bottom: 0.35rem;
         }
     </style>
     """,
@@ -191,8 +222,8 @@ st.write(
 )
 
 st.markdown("### ⚙️ Configurações rápidas")
-config_container = st.container()
-with config_container:
+with st.container():
+    st.markdown("<div class='audio-config-card'>", unsafe_allow_html=True)
     config_col1, config_col2 = st.columns(2)
     with config_col1:
         monitor_input = st.toggle(
@@ -213,11 +244,13 @@ with config_container:
         horizontal=True,
         help="Selecione se deseja ouvir o áudio do dispositivo ou carregar um arquivo gravado.",
     )
+    st.markdown("</div>", unsafe_allow_html=True)
 
 st.markdown("---")
 
-col_status, col_timestamp = st.columns([3, 1])
-with col_status:
+st.markdown("<div class='status-row'>", unsafe_allow_html=True)
+status_column, timestamp_column = st.columns([3, 1])
+with status_column:
     if monitor_input and monitor_output:
         status_message = "Monitorando entrada e saída de áudio."
     elif monitor_input:
@@ -229,8 +262,9 @@ with col_status:
 
     st.markdown(f"<div class='status-card'>{status_message}</div>", unsafe_allow_html=True)
 
-with col_timestamp:
+with timestamp_column:
     st.caption(f"Última atualização: {datetime.now().strftime('%H:%M:%S')}")
+st.markdown("</div>", unsafe_allow_html=True)
 
 if audio_mode == "Tempo real":
     st.markdown("<div class='audio-section'>", unsafe_allow_html=True)
