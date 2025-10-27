@@ -128,9 +128,11 @@ def _browser_audio_recorder(element_id: str = "browser-recorder") -> Optional[Tu
     )
 
     if component_value:
+        if not isinstance(component_value, str):
+            return None
         try:
             payload = json.loads(component_value)
-        except json.JSONDecodeError:
+        except (json.JSONDecodeError, TypeError):
             return None
 
         if not payload or not isinstance(payload, dict):
