@@ -83,15 +83,17 @@ page_link = getattr(st, "page_link", None)
 with st.sidebar:
     st.markdown("""<div class="sidebar-box"><h3>🚀 Fluxos principais</h3></div>""", unsafe_allow_html=True)
     if page_link:
+        page_link("app.py", label="Home", icon="🏠")
         page_link("pages/1_analise_de_curriculos.py", label="Análise de Currículos", icon="🧠")
         page_link("pages/2_audio_studio.py", label="Estúdio de Áudio", icon="🎧")
     else:
+        st.markdown("[🏠 Home](app.py)")
         st.markdown("[🧠 Análise de Currículos](pages/1_analise_de_curriculos.py)")
         st.markdown("[🎧 Estúdio de Áudio](pages/2_audio_studio.py)")
     st.markdown("""<div class="sidebar-box">
         <h4>Guia rápido</h4>
         <ul>
-            <li>Defina seus agentes CrewAI.</li>
+            <li>Defina seus agentes inteligentes.</li>
             <li>Carregue currículos e áudios.</li>
             <li>Monitore insights em tempo real.</li>
         </ul>
@@ -133,7 +135,7 @@ with quick_cols[1]:
     else:
         st.markdown("[🎙️ Entrar no estúdio de áudio](pages/2_audio_studio.py)")
 with quick_cols[2]:
-    st.link_button("Ver documentação do CrewAI", "https://docs.crewai.com/")
+    st.link_button("Falar com nossa equipe", "mailto:suporte@recruitment.ai")
 
 st.markdown("---")
 
@@ -141,7 +143,7 @@ st.subheader("Como funciona")
 st.markdown(
     """<div class="timeline">
     <div class="timeline-step">
-        <h4>1. Configure seus agentes CrewAI</h4>
+        <h4>1. Configure seus agentes inteligentes</h4>
         <p>Personalize personas, ferramentas e prompts diretamente no fluxo de análise para se adequar às competências que deseja mapear.</p>
     </div>
     <div class="timeline-step">
