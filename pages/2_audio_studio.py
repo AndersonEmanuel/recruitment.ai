@@ -8,25 +8,25 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 
-def _browser_audio_recorder(key: str = "browser-recorder") -> Optional[Tuple[bytes, str]]:
+def _browser_audio_recorder(element_id: str = "browser-recorder") -> Optional[Tuple[bytes, str]]:
     """Renderiza um componente HTML que grava áudio pelo navegador."""
 
     component_value = components.html(
         f"""
-        <div id="{key}-container" style="padding:0.75rem;border:1px solid var(--secondary-background-color,#d6d6d6);border-radius:0.5rem;">
+        <div id="{element_id}-container" style="padding:0.75rem;border:1px solid var(--secondary-background-color,#d6d6d6);border-radius:0.5rem;">
             <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
-                <button id="{key}-start" style="padding:0.4rem 1rem;border:none;border-radius:999px;background-color:#f63366;color:white;font-weight:600;cursor:pointer;">Iniciar gravação</button>
-                <button id="{key}-stop" style="padding:0.4rem 1rem;border-radius:999px;border:1px solid #f63366;background-color:white;color:#f63366;font-weight:600;cursor:pointer;" disabled>Parar</button>
-                <span id="{key}-status" style="font-size:0.9rem;color:#6c757d;">Pronto para gravar.</span>
+                <button id="{element_id}-start" style="padding:0.4rem 1rem;border:none;border-radius:999px;background-color:#f63366;color:white;font-weight:600;cursor:pointer;">Iniciar gravação</button>
+                <button id="{element_id}-stop" style="padding:0.4rem 1rem;border-radius:999px;border:1px solid #f63366;background-color:white;color:#f63366;font-weight:600;cursor:pointer;" disabled>Parar</button>
+                <span id="{element_id}-status" style="font-size:0.9rem;color:#6c757d;">Pronto para gravar.</span>
             </div>
-            <audio id="{key}-player" controls style="margin-top:0.75rem;width:100%;display:none;"></audio>
+            <audio id="{element_id}-player" controls style="margin-top:0.75rem;width:100%;display:none;"></audio>
         </div>
         <script>
         (function() {{
-            const startBtn = document.getElementById("{key}-start");
-            const stopBtn = document.getElementById("{key}-stop");
-            const statusLabel = document.getElementById("{key}-status");
-            const player = document.getElementById("{key}-player");
+            const startBtn = document.getElementById("{element_id}-start");
+            const stopBtn = document.getElementById("{element_id}-stop");
+            const statusLabel = document.getElementById("{element_id}-status");
+            const player = document.getElementById("{element_id}-player");
             let mediaStream = null;
             let recorder = null;
             let chunks = [];
@@ -125,7 +125,6 @@ def _browser_audio_recorder(key: str = "browser-recorder") -> Optional[Tuple[byt
         </script>
         """,
         height=240,
-        key=key,
     )
 
     if component_value:
