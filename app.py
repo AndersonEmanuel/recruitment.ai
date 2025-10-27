@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import streamlit as st
 
 st.set_page_config(
@@ -22,6 +24,8 @@ st.markdown(
     """
 )
 
+pages_dir = Path(__file__).parent / "pages"
+
 col1, col2 = st.columns(2)
 with col1:
     st.subheader("Comece pela Análise de Currículos")
@@ -32,7 +36,7 @@ with col1:
         """
     )
     if st.button("📄 Ir para Análise de Currículos", use_container_width=True):
-        st.switch_page("pages/1_analise_de_curriculos.py")
+        st.switch_page(pages_dir / "1_analise_de_curriculos.py")
 
 with col2:
     st.subheader("Gerencie os áudios do seu computador")
@@ -43,7 +47,7 @@ with col2:
         """
     )
     if st.button("🎧 Ir para Estúdio de Áudio", use_container_width=True):
-        st.switch_page("pages/2_audio_studio.py")
+        st.switch_page(pages_dir / "2_audio_studio.py")
 
 st.markdown("---")
 
