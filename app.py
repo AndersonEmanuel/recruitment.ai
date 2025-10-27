@@ -81,7 +81,6 @@ st.markdown(
 page_link = getattr(st, "page_link", None)
 
 with st.sidebar:
-    st.markdown("""<div class="sidebar-box"><h3>🚀 Fluxos principais</h3></div>""", unsafe_allow_html=True)
     if page_link:
         page_link("app.py", label="Home", icon="🏠")
         page_link("pages/1_analise_de_curriculos.py", label="Análise de Currículos", icon="🧠")
@@ -90,17 +89,6 @@ with st.sidebar:
         st.markdown("[🏠 Home](app.py)")
         st.markdown("[🧠 Análise de Currículos](pages/1_analise_de_curriculos.py)")
         st.markdown("[🎧 Estúdio de Áudio](pages/2_audio_studio.py)")
-    st.markdown("""<div class="sidebar-box">
-        <h4>Guia rápido</h4>
-        <ul>
-            <li>Defina seus agentes inteligentes.</li>
-            <li>Carregue currículos e áudios.</li>
-            <li>Monitore insights em tempo real.</li>
-        </ul>
-        </div>""", unsafe_allow_html=True)
-    st.markdown("""<div class="sidebar-box">
-        <strong>Dica:</strong> personalize prompts e habilidades para adaptar a jornada ao seu processo.
-        </div>""", unsafe_allow_html=True)
 
 st.markdown(
     """<div class="hero-card">
