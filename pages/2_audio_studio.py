@@ -157,41 +157,73 @@ def _browser_audio_recorder(element_id: str = "browser-recorder") -> Optional[Tu
 st.markdown(
     """
     <style>
+        :root {
+            --audio-page-background: radial-gradient(circle at 15% 20%, rgba(246,51,102,0.08), transparent 50%),
+                                    radial-gradient(circle at 80% 0%, rgba(63,81,181,0.08), transparent 52%),
+                                    #f7f8fc;
+            --audio-surface: rgba(255, 255, 255, 0.92);
+            --audio-surface-strong: #ffffff;
+            --audio-surface-border: rgba(148, 163, 184, 0.25);
+            --audio-surface-shadow: rgba(15, 23, 42, 0.08);
+            --audio-status-bg: linear-gradient(135deg, rgba(246,51,102,0.08), rgba(246,51,102,0.02));
+            --audio-status-border: rgba(246,51,102,0.15);
+            --audio-text-strong: #1f2937;
+            --audio-text-muted: #6c757d;
+        }
+        html[data-theme="dark"] {
+            --audio-page-background: radial-gradient(circle at 10% 15%, rgba(236,72,153,0.08), transparent 45%),
+                                    radial-gradient(circle at 90% 5%, rgba(59,130,246,0.08), transparent 48%),
+                                    rgba(15,23,42,0.98);
+            --audio-surface: rgba(17, 24, 39, 0.78);
+            --audio-surface-strong: rgba(17, 24, 39, 0.92);
+            --audio-surface-border: rgba(148, 163, 184, 0.25);
+            --audio-surface-shadow: rgba(2, 6, 23, 0.6);
+            --audio-status-bg: linear-gradient(135deg, rgba(236,72,153,0.16), rgba(236,72,153,0.08));
+            --audio-status-border: rgba(236,72,153,0.35);
+            --audio-text-strong: #e2e8f0;
+            --audio-text-muted: rgba(226, 232, 240, 0.75);
+        }
         body {
-            background: radial-gradient(circle at 15% 20%, rgba(246,51,102,0.08), transparent 50%),
-                        radial-gradient(circle at 80% 0%, rgba(63,81,181,0.08), transparent 52%),
-                        #f7f8fc;
+            background: var(--audio-page-background);
         }
         main .block-container {
             padding: 2.4rem 3rem 3rem;
             max-width: 1180px;
+            color: var(--audio-text-strong);
         }
         .audio-section {
             padding: 1.5rem;
             border: 1px solid rgba(99,102,241,0.14);
             border-radius: 1rem;
-            background: rgba(255, 255, 255, 0.92);
-            box-shadow: 0 18px 40px rgba(79, 70, 229, 0.12);
+            background: var(--audio-surface);
+            box-shadow: 0 18px 40px var(--audio-surface-shadow);
             margin-bottom: 1.6rem;
+            color: var(--audio-text-strong);
+        }
+        html[data-theme="dark"] .audio-section {
+            border-color: rgba(99,102,241,0.25);
         }
         .audio-section h4 {
             margin-top: 0;
             margin-bottom: 0.5rem;
+            color: var(--audio-text-strong);
         }
         .audio-config-card {
-            background: #ffffff;
+            background: var(--audio-surface-strong);
             border-radius: 1rem;
             padding: 1.4rem 1.6rem;
-            border: 1px solid rgba(148, 163, 184, 0.25);
-            box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08);
+            border: 1px solid var(--audio-surface-border);
+            box-shadow: 0 16px 36px var(--audio-surface-shadow);
             margin-bottom: 1.6rem;
+            color: var(--audio-text-strong);
         }
         .status-card {
             border-radius: 0.75rem;
             padding: 1rem;
-            background: linear-gradient(135deg, rgba(246,51,102,0.08), rgba(246,51,102,0.02));
-            border: 1px solid rgba(246,51,102,0.15);
+            background: var(--audio-status-bg);
+            border: 1px solid var(--audio-status-border);
             font-weight: 500;
+            color: var(--audio-text-strong);
         }
         .status-row {
             display: flex;
@@ -201,7 +233,7 @@ st.markdown(
             margin-bottom: 1.2rem;
         }
         .timestamp {
-            color: var(--text-color,#6c757d);
+            color: var(--audio-text-muted);
             text-align: right;
         }
         .stToggle, .stCheckbox, .stRadio {
