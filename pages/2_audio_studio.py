@@ -1,64 +1,155 @@
+import base64
+import binascii
+import json
 from datetime import datetime
-from io import BytesIO
-from typing import Optional
+from typing import Optional, Tuple
 
-import numpy as np
 import streamlit as st
-from streamlit_webrtc import AudioProcessorBase, WebRtcMode, webrtc_streamer
+import streamlit.components.v1 as components
 
 
-class AudioRecorder(AudioProcessorBase):
-    """Captura quadros de áudio do navegador para gerar um arquivo WAV."""
+def _browser_audio_recorder(key: str = "browser-recorder") -> Optional[Tuple[bytes, str]]:
+    """Renderiza um componente HTML que grava áudio pelo navegador."""
 
-    def __init__(self) -> None:
-        self.frames = []
+    component_value = components.html(
+        f"""
+        <div id="{key}-container" style="padding:0.75rem;border:1px solid var(--secondary-background-color,#d6d6d6);border-radius:0.5rem;">
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
+                <button id="{key}-start" style="padding:0.4rem 1rem;border:none;border-radius:999px;background-color:#f63366;color:white;font-weight:600;cursor:pointer;">Iniciar gravação</button>
+                <button id="{key}-stop" style="padding:0.4rem 1rem;border-radius:999px;border:1px solid #f63366;background-color:white;color:#f63366;font-weight:600;cursor:pointer;" disabled>Parar</button>
+                <span id="{key}-status" style="font-size:0.9rem;color:#6c757d;">Pronto para gravar.</span>
+            </div>
+            <audio id="{key}-player" controls style="margin-top:0.75rem;width:100%;display:none;"></audio>
+        </div>
+        <script>
+        (function() {{
+            const startBtn = document.getElementById("{key}-start");
+            const stopBtn = document.getElementById("{key}-stop");
+            const statusLabel = document.getElementById("{key}-status");
+            const player = document.getElementById("{key}-player");
+            let mediaStream = null;
+            let recorder = null;
+            let chunks = [];
 
-    def recv(self, frame):  # type: ignore[override]
-        self.frames.append(frame)
-        return frame
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {{
+                statusLabel.textContent = "Seu navegador não suporta captura de áudio.";
+                startBtn.disabled = true;
+                stopBtn.disabled = true;
+                return;
+            }}
 
+            function postValue(value) {{
+                window.parent.postMessage({{
+                    isStreamlitMessage: true,
+                    type: "streamlit:setComponentValue",
+                    value: value
+                }}, "*");
+            }}
 
-def _frames_to_wav(frames) -> Optional[BytesIO]:
-    if not frames:
-        return None
+            async function ensureStream() {{
+                if (mediaStream) {{
+                    return mediaStream;
+                }}
+                try {{
+                    mediaStream = await navigator.mediaDevices.getUserMedia({{ audio: true }});
+                    return mediaStream;
+                }} catch (err) {{
+                    statusLabel.textContent = "Permita o acesso ao microfone para gravar.";
+                    console.error(err);
+                    return null;
+                }}
+            }}
 
-    sample_rate = frames[0].sample_rate
-    channels = frames[0].layout.nb_channels
+            startBtn.addEventListener("click", async () => {{
+                const stream = await ensureStream();
+                if (!stream) {{
+                    return;
+                }}
 
-    audio_chunks = [frame.to_ndarray() for frame in frames]
-    audio_concat = np.concatenate(audio_chunks, axis=1)
+                if (recorder && recorder.state !== "inactive") {{
+                    recorder.stop();
+                }}
 
-    # Converte para o formato (num_samples, num_channels) exigido pelo WAV.
-    audio_concat = audio_concat.T
+                chunks = [];
+                try {{
+                    recorder = new MediaRecorder(stream);
+                }} catch (err) {{
+                    statusLabel.textContent = "Não foi possível iniciar a gravação.";
+                    console.error(err);
+                    return;
+                }}
 
-    if audio_concat.dtype != np.int16:
-        max_int16 = np.iinfo(np.int16).max
-        audio_concat = np.clip(audio_concat, -1.0, 1.0)
-        audio_concat = (audio_concat * max_int16).astype(np.int16)
-    else:
-        audio_concat = audio_concat.astype(np.int16)
+                recorder.ondataavailable = (event) => {{
+                    if (event.data && event.data.size > 0) {{
+                        chunks.push(event.data);
+                    }}
+                }};
 
-    wav_buffer = BytesIO()
-    wav_buffer.write(b"RIFF")
-    # Cálculo manual do cabeçalho WAV para evitar dependências adicionais.
-    data_bytes = audio_concat.tobytes()
-    file_size = 36 + len(data_bytes)
-    wav_buffer.write(file_size.to_bytes(4, "little"))
-    wav_buffer.write(b"WAVEfmt ")
-    wav_buffer.write((16).to_bytes(4, "little"))  # Subchunk1Size (PCM)
-    wav_buffer.write((1).to_bytes(2, "little"))  # AudioFormat PCM
-    wav_buffer.write((channels).to_bytes(2, "little"))
-    wav_buffer.write((sample_rate).to_bytes(4, "little"))
-    byte_rate = sample_rate * channels * 2  # 16 bits = 2 bytes
-    wav_buffer.write(byte_rate.to_bytes(4, "little"))
-    block_align = channels * 2
-    wav_buffer.write(block_align.to_bytes(2, "little"))
-    wav_buffer.write((16).to_bytes(2, "little"))  # BitsPerSample
-    wav_buffer.write(b"data")
-    wav_buffer.write(len(data_bytes).to_bytes(4, "little"))
-    wav_buffer.write(data_bytes)
-    wav_buffer.seek(0)
-    return wav_buffer
+                recorder.onstop = () => {{
+                    const blob = new Blob(chunks, {{ type: recorder.mimeType }});
+                    if (player.src) {{
+                        URL.revokeObjectURL(player.src);
+                    }}
+                    player.src = URL.createObjectURL(blob);
+                    player.style.display = "block";
+
+                    const reader = new FileReader();
+                    reader.onloadend = () => {{
+                        const base64 = reader.result.split(",")[1];
+                        const payload = JSON.stringify({{
+                            data: base64,
+                            mimeType: blob.type
+                        }});
+                        postValue(payload);
+                    }};
+                    reader.readAsDataURL(blob);
+
+                    statusLabel.textContent = "Gravação pronta para reprodução.";
+                }};
+
+                postValue(null);
+                recorder.start();
+                statusLabel.textContent = "Gravando... clique em Parar para finalizar.";
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+            }});
+
+            stopBtn.addEventListener("click", () => {{
+                if (recorder && recorder.state !== "inactive") {{
+                    recorder.stop();
+                }}
+                stopBtn.disabled = true;
+                startBtn.disabled = false;
+            }});
+        }})();
+        </script>
+        """,
+        height=240,
+        key=key,
+    )
+
+    if component_value:
+        try:
+            payload = json.loads(component_value)
+        except json.JSONDecodeError:
+            return None
+
+        if not payload or not isinstance(payload, dict):
+            return None
+
+        data_b64 = payload.get("data")
+        if not data_b64:
+            return None
+
+        mime_type = payload.get("mimeType", "audio/webm")
+        try:
+            audio_bytes = base64.b64decode(data_b64)
+        except (binascii.Error, ValueError):
+            return None
+
+        return audio_bytes, mime_type
+
+    return None
 
 st.title("🎧 Estúdio de Áudio")
 st.write(
@@ -115,47 +206,39 @@ if audio_mode == "Tempo real":
 
     st.subheader("Gravação rápida pelo navegador")
     st.write(
-        "Clique em \"Start\" para iniciar a captura pelo microfone padrão e em \"Stop\" para encerrar."
+        "Utilize os botões abaixo para gravar diretamente no navegador e gerar um arquivo para download."
     )
 
     if "recorded_audio" not in st.session_state:
         st.session_state.recorded_audio = None
-    if "was_streaming" not in st.session_state:
-        st.session_state.was_streaming = False
+    if "recorded_mime" not in st.session_state:
+        st.session_state.recorded_mime = "audio/webm"
 
-    ctx = webrtc_streamer(
-        key="audio-recorder",
-        mode=WebRtcMode.SENDONLY,
-        media_stream_constraints={"audio": True, "video": False},
-        audio_receiver_size=256,
-        async_processing=False,
-        audio_processor_factory=AudioRecorder,
-    )
-
-    if ctx.state.playing:
-        st.info("🎙️ Gravando... sua voz está sendo capturada.")
-        if not st.session_state.was_streaming and ctx.audio_processor:
-            ctx.audio_processor.frames = []
-        st.session_state.was_streaming = True
-        st.session_state.recorded_audio = None
-    elif st.session_state.was_streaming and ctx.audio_processor:
-        wav_buffer = _frames_to_wav(ctx.audio_processor.frames)
-        ctx.audio_processor.frames = []
-        st.session_state.was_streaming = False
-        if wav_buffer is None:
-            st.warning(
-                "Não foi possível gerar o arquivo. Verifique se o microfone está liberado para o navegador."
-            )
-        st.session_state.recorded_audio = wav_buffer
+    recorded_payload = _browser_audio_recorder()
+    if recorded_payload:
+        audio_bytes, mime_type = recorded_payload
+        st.session_state.recorded_audio = audio_bytes
+        st.session_state.recorded_mime = mime_type
 
     if st.session_state.recorded_audio:
         st.success("Gravação finalizada! Ouça ou baixe o arquivo abaixo.")
-        st.audio(st.session_state.recorded_audio, format="audio/wav")
+        st.audio(st.session_state.recorded_audio, format=st.session_state.recorded_mime)
+
+        extension_map = {
+            "audio/webm": "webm",
+            "audio/ogg": "ogg",
+            "audio/wav": "wav",
+            "audio/mp3": "mp3",
+            "audio/mpeg": "mp3",
+            "audio/mp4": "m4a",
+        }
+        file_extension = extension_map.get(st.session_state.recorded_mime, "webm")
+
         st.download_button(
             "Baixar gravação",
-            data=st.session_state.recorded_audio.getvalue(),
-            file_name=f"gravacao_{datetime.now().strftime('%H%M%S')}.wav",
-            mime="audio/wav",
+            data=st.session_state.recorded_audio,
+            file_name=f"gravacao_{datetime.now().strftime('%H%M%S')}.{file_extension}",
+            mime=st.session_state.recorded_mime,
         )
     else:
         st.caption("Nenhuma gravação disponível ainda.")
