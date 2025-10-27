@@ -152,6 +152,35 @@ def _browser_audio_recorder(element_id: str = "browser-recorder") -> Optional[Tu
 
     return None
 
+st.markdown(
+    """
+    <style>
+        .audio-section {
+            padding: 1.25rem;
+            border: 1px solid var(--secondary-background-color,#d6d6d6);
+            border-radius: 0.75rem;
+            background: var(--background-color,#ffffff);
+        }
+        .audio-section h4 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+        }
+        .status-card {
+            border-radius: 0.75rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, rgba(246,51,102,0.08), rgba(246,51,102,0.02));
+            border: 1px solid rgba(246,51,102,0.15);
+            font-weight: 500;
+        }
+        .timestamp {
+            color: var(--text-color,#6c757d);
+            text-align: right;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 st.title("🎧 Estúdio de Áudio")
 st.write(
     """
@@ -161,33 +190,50 @@ st.write(
     """
 )
 
-st.sidebar.header("Fontes ativas")
-monitor_input = st.sidebar.toggle("Habilitar monitoramento da entrada (microfone)", value=True)
-monitor_output = st.sidebar.toggle("Habilitar monitoramento da saída (alto-falantes)", value=False)
+st.markdown("### ⚙️ Configurações rápidas")
+config_container = st.container()
+with config_container:
+    config_col1, config_col2 = st.columns(2)
+    with config_col1:
+        monitor_input = st.toggle(
+            "Monitorar microfone",
+            value=True,
+            help="Ative para acompanhar o áudio da sua entrada.",
+        )
+    with config_col2:
+        monitor_output = st.toggle(
+            "Monitorar alto-falantes",
+            value=False,
+            help="Ative para receber retorno da saída de áudio.",
+        )
 
-audio_mode = st.sidebar.radio(
-    "Modo de escuta",
-    options=["Tempo real", "Upload de arquivo"],
-    help="Selecione se deseja ouvir o áudio do dispositivo ou carregar um arquivo gravado.",
-)
+    audio_mode = st.radio(
+        "Como deseja trabalhar o áudio hoje?",
+        options=["Tempo real", "Upload de arquivo"],
+        horizontal=True,
+        help="Selecione se deseja ouvir o áudio do dispositivo ou carregar um arquivo gravado.",
+    )
 
 st.markdown("---")
 
 col_status, col_timestamp = st.columns([3, 1])
 with col_status:
     if monitor_input and monitor_output:
-        st.success("Monitorando entrada e saída de áudio.")
+        status_message = "Monitorando entrada e saída de áudio."
     elif monitor_input:
-        st.info("Monitorando apenas o microfone.")
+        status_message = "Monitorando apenas o microfone."
     elif monitor_output:
-        st.info("Monitorando apenas os alto-falantes.")
+        status_message = "Monitorando apenas os alto-falantes."
     else:
-        st.warning("Nenhuma fonte de áudio habilitada.")
+        status_message = "Nenhuma fonte de áudio habilitada."
+
+    st.markdown(f"<div class='status-card'>{status_message}</div>", unsafe_allow_html=True)
 
 with col_timestamp:
     st.caption(f"Última atualização: {datetime.now().strftime('%H:%M:%S')}")
 
 if audio_mode == "Tempo real":
+    st.markdown("<div class='audio-section'>", unsafe_allow_html=True)
     st.subheader("Escuta em tempo real")
     st.write(
         """
@@ -197,11 +243,20 @@ if audio_mode == "Tempo real":
         """
     )
 
-    volume_input = st.slider("Nível do microfone", 0, 100, 65, help="Ajuste conforme sua mesa de som")
-    volume_output = st.slider("Nível dos alto-falantes", 0, 100, 55)
+    levels_col1, levels_col2 = st.columns(2)
+    with levels_col1:
+        volume_input = st.slider(
+            "Nível do microfone",
+            0,
+            100,
+            65,
+            help="Ajuste conforme sua mesa de som",
+        )
+        st.progress(volume_input / 100, text="Nível atual da entrada")
 
-    st.progress(volume_input / 100, text="Nível atual da entrada")
-    st.progress(volume_output / 100, text="Nível atual da saída")
+    with levels_col2:
+        volume_output = st.slider("Nível dos alto-falantes", 0, 100, 55)
+        st.progress(volume_output / 100, text="Nível atual da saída")
 
     st.markdown("---")
 
@@ -243,7 +298,9 @@ if audio_mode == "Tempo real":
         )
     else:
         st.caption("Nenhuma gravação disponível ainda.")
+    st.markdown("</div>", unsafe_allow_html=True)
 else:
+    st.markdown("<div class='audio-section'>", unsafe_allow_html=True)
     st.subheader("Upload e reprodução")
     uploaded_audio = st.file_uploader(
         "Faça upload de um arquivo de áudio (MP3, WAV, M4A)",
@@ -268,8 +325,11 @@ else:
     else:
         st.info("Nenhum arquivo de áudio enviado. Faça upload para iniciar a reprodução.")
 
+    st.markdown("</div>", unsafe_allow_html=True)
+
 st.markdown("---")
 
+st.markdown("<div class='audio-section'>", unsafe_allow_html=True)
 st.subheader("Preferências avançadas")
 latency: Optional[int] = st.number_input(
     "Latência máxima permitida (ms)",
@@ -288,3 +348,4 @@ st.write(
 )
 
 st.button("Salvar preferências", type="primary")
+st.markdown("</div>", unsafe_allow_html=True)
