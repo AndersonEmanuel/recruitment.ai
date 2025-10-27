@@ -22,35 +22,6 @@ st.markdown(
     """
 )
 
-col1, col2 = st.columns(2)
-with col1:
-    st.subheader("Comece pela Análise de Currículos")
-    st.write(
-        """
-        Faça upload de vários currículos em PDF, DOCX ou TXT e gere resumos automáticos,
-        pontuações e insights sobre os candidatos. Ideal para triagens em lote.
-        """
-    )
-    st.page_link(
-        "pages/1_analise_de_curriculos.py",
-        label="Ir para Análise de Currículos",
-        icon="📄",
-    )
-
-with col2:
-    st.subheader("Gerencie os áudios do seu computador")
-    st.write(
-        """
-        Selecione fontes de áudio de entrada ou saída, faça upload de trechos gravados e
-        monitore tudo em um painel centralizado para entrevistas ou dinâmicas remotas.
-        """
-    )
-    st.page_link(
-        "pages/2_audio_studio.py",
-        label="Ir para Estúdio de Áudio",
-        icon="🎧",
-    )
-
 st.markdown("---")
 
 st.subheader("Como funciona")
